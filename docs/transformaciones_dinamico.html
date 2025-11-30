@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFM Abandono - Transformaciones de Datos (Dinámico)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tabla-card { transition: all 0.3s ease; cursor: pointer; }
+        .tabla-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.active { display: flex; justify-content: center; align-items: center; }
+        .modal-content { background: white; border-radius: 12px; max-width: 900px; max-height: 80vh; overflow-y: auto; padding: 24px; margin: 20px; }
+        .arrow { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .enlace-reporte { color: #2563eb; text-decoration: underline; cursor: pointer; }
+        .enlace-reporte:hover { color: #1d4ed8; }
+        .df-alumno-link:hover { transform: scale(1.02); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold mb-2">🎓 TFM: Prediccion de Abandono Universitario</h1>
+            <p class="text-xl opacity-90">Diagrama de Transformaciones de Datos - Fase 1 (Dinámico)</p>
+            <p class="text-sm opacity-75 mt-2">Autora: Maria Jose Morte (morte@uji.es) | GitHub: mortemj</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Resumen -->
+        <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📊 Resumen del Proceso</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                    <div class="text-3xl font-bold text-blue-600">9</div>
+                    <div class="text-gray-600">Tablas procesadas</div>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <div class="text-3xl font-bold text-green-600">52</div>
+                    <div class="text-gray-600">Columnas totales</div>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-4 text-center">
+                    <div class="text-3xl font-bold text-purple-600">✅</div>
+                    <div class="text-gray-600">Generado dinámicamente</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diagrama de flujo -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🔄 Flujo de Transformacion</h2>
+            <p class="text-gray-600 mb-4">Haz clic en cada tabla para ver el detalle:</p>
+            
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                <div class="bg-yellow-100 border-2 border-yellow-400 rounded-xl p-4 text-center">
+                    <div class="text-lg font-bold text-yellow-700">📁 Excel Originales</div>
+                    <div class="text-sm text-yellow-600">data/01_raw/</div>
+                </div>
+            </div>
+
+            <div class="text-center text-4xl text-gray-400 arrow mb-6">⬇️</div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
+                
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-blue-500" onclick="openModal('becas')">
+                    <h3 class="font-bold text-blue-700">📋 Becas</h3>
+                    <div class="text-sm text-gray-500 mt-1">70,524 registros | 3 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500" onclick="openModal('domicilios')">
+                    <h3 class="font-bold text-green-700">📋 Domicilios</h3>
+                    <div class="text-sm text-gray-500 mt-1">109,206 registros | 6 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-purple-500" onclick="openModal('expedientes')">
+                    <h3 class="font-bold text-purple-700">📋 Expedientes</h3>
+                    <div class="text-sm text-gray-500 mt-1">109,575 registros | 14 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-pink-500" onclick="openModal('nac_sexo')">
+                    <h3 class="font-bold text-pink-700">📋 Nac_Sexo</h3>
+                    <div class="text-sm text-gray-500 mt-1">30,873 registros | 4 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-orange-500" onclick="openModal('notas')">
+                    <h3 class="font-bold text-orange-700">📋 Notas</h3>
+                    <div class="text-sm text-gray-500 mt-1">107,908 registros | 4 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-teal-500" onclick="openModal('preinscripcion')">
+                    <h3 class="font-bold text-teal-700">📋 Preinscripcion</h3>
+                    <div class="text-sm text-gray-500 mt-1">210,996 registros | 10 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-indigo-500" onclick="openModal('recibos')">
+                    <h3 class="font-bold text-indigo-700">📋 Recibos</h3>
+                    <div class="text-sm text-gray-500 mt-1">114,447 registros | 4 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-cyan-500" onclick="openModal('titulaciones')">
+                    <h3 class="font-bold text-cyan-700">📋 Titulaciones</h3>
+                    <div class="text-sm text-gray-500 mt-1">45 registros | 4 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+                <div class="tabla-card bg-white rounded-xl shadow-md p-4 border-l-4 border-rose-500" onclick="openModal('trabajo')">
+                    <h3 class="font-bold text-rose-700">📋 Trabajo</h3>
+                    <div class="text-sm text-gray-500 mt-1">195,524 registros | 3 columnas</div>
+                    <div class="text-xs text-gray-400 mt-1">Clic para ver detalle</div>
+                </div>
+            </div>
+
+            <div class="text-center text-4xl text-gray-400 arrow mb-6">⬇️</div>
+
+            <!-- df_alumno (se añadirá en notebook 03) -->
+            <div class="flex justify-center">
+                <a href="reporte_df_alumno.html" target="_blank" class="df-alumno-link transition-all">
+                    <div class="bg-gradient-to-r from-green-400 to-blue-500 rounded-xl p-6 text-white text-center shadow-lg hover:shadow-2xl cursor-pointer">
+                        <div class="text-2xl font-bold">🎯 df_alumno.parquet</div>
+                        <div class="text-lg opacity-90">Dataset unificado para modelado</div>
+                        <div class="text-sm opacity-75 mt-2">109,575 registros | 30 columnas</div>
+                        <div class="text-xs mt-3 bg-white/20 rounded px-3 py-1 inline-block">📊 Clic para ver Reporte Sweetviz</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- TABLA RESUMEN -->
+        <section class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📋 Resumen por Tabla</h2>
+            <p class="text-gray-600 mb-4">Haz clic en el nombre para ver el <strong>Reporte Sweetviz</strong>:</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Tabla</th>
+                            <th class="px-4 py-2 text-center">Registros</th>
+                            <th class="px-4 py-2 text-center">Columnas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b "><td class="px-4 py-2"><a href="reporte_becas.html" class="enlace-reporte">📊 Becas</a></td><td class="text-center">70,524</td><td class="text-center text-green-600 font-bold">3</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-4 py-2"><a href="reporte_domicilios.html" class="enlace-reporte">📊 Domicilios</a></td><td class="text-center">109,206</td><td class="text-center text-green-600 font-bold">6</td></tr>
+<tr class="border-b "><td class="px-4 py-2"><a href="reporte_expedientes.html" class="enlace-reporte">📊 Expedientes</a></td><td class="text-center">109,575</td><td class="text-center text-green-600 font-bold">14</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-4 py-2"><a href="reporte_nac_sexo.html" class="enlace-reporte">📊 Nac_Sexo</a></td><td class="text-center">30,873</td><td class="text-center text-green-600 font-bold">4</td></tr>
+<tr class="border-b "><td class="px-4 py-2"><a href="reporte_notas.html" class="enlace-reporte">📊 Notas</a></td><td class="text-center">107,908</td><td class="text-center text-green-600 font-bold">4</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-4 py-2"><a href="reporte_preinscripcion.html" class="enlace-reporte">📊 Preinscripcion</a></td><td class="text-center">210,996</td><td class="text-center text-green-600 font-bold">10</td></tr>
+<tr class="border-b "><td class="px-4 py-2"><a href="reporte_recibos.html" class="enlace-reporte">📊 Recibos</a></td><td class="text-center">114,447</td><td class="text-center text-green-600 font-bold">4</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-4 py-2"><a href="reporte_titulaciones.html" class="enlace-reporte">📊 Titulaciones</a></td><td class="text-center">45</td><td class="text-center text-green-600 font-bold">4</td></tr>
+<tr class="border-b "><td class="px-4 py-2"><a href="reporte_trabajo.html" class="enlace-reporte">📊 Trabajo</a></td><td class="text-center">195,524</td><td class="text-center text-green-600 font-bold">3</td></tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODALES -->
+    
+    <div id="modal-becas" class="modal" onclick="closeModal('becas')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-blue-700">📋 Becas</h2>
+                <button onclick="closeModal('becas')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_becas.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 70,524 | <strong>Columnas:</strong> 3
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-blue-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">curso_aca</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">beca</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-domicilios" class="modal" onclick="closeModal('domicilios')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-green-700">📋 Domicilios</h2>
+                <button onclick="closeModal('domicilios')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_domicilios.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 109,206 | <strong>Columnas:</strong> 6
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-green-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">curso_aca</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">poblacion</td><td class="px-3 py-2">object</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">provincia</td><td class="px-3 py-2">object</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">pais_domicilio</td><td class="px-3 py-2">object</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">tipo_domicilio</td><td class="px-3 py-2">object</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-expedientes" class="modal" onclick="closeModal('expedientes')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-purple-700">📋 Expedientes</h2>
+                <button onclick="closeModal('expedientes')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_expedientes.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 109,575 | <strong>Columnas:</strong> 14
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-purple-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">exp_tit_id</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">curso_aca</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">curso_aca_fin</td><td class="px-3 py-2">Int16</td><td class="px-3 py-2 text-right">51.1%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">nota_1</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">52.5%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">via_acceso</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">seguro</td><td class="px-3 py-2">int8</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">nota_selectividad_exp</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">45.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">nota_acceso_exp</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">10.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">cred_matriculados</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">cred_superados</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">egresado</td><td class="px-3 py-2">int8</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">nuevo</td><td class="px-3 py-2">int8</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">media_curso</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">7.2%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-nac_sexo" class="modal" onclick="closeModal('nac_sexo')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-pink-700">📋 Nac_Sexo</h2>
+                <button onclick="closeModal('nac_sexo')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_nac_sexo.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 30,873 | <strong>Columnas:</strong> 4
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-pink-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">sexo</td><td class="px-3 py-2">int8</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">pais</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">edad</td><td class="px-3 py-2">int8</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-notas" class="modal" onclick="closeModal('notas')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-orange-700">📋 Notas</h2>
+                <button onclick="closeModal('notas')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_notas.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 107,908 | <strong>Columnas:</strong> 4
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-orange-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">curso_aca</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">media_titulacion_curso</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">media_alumno_curso</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-preinscripcion" class="modal" onclick="closeModal('preinscripcion')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-teal-700">📋 Preinscripcion</h2>
+                <button onclick="closeModal('preinscripcion')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_preinscripcion.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 210,996 | <strong>Columnas:</strong> 10
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-teal-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">ano</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">universidad</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">municipio_preins</td><td class="px-3 py-2">object</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">cp_preins</td><td class="px-3 py-2">object</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">orden_preferencia</td><td class="px-3 py-2">int8</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">cupo</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">estado</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">nota_selectividad</td><td class="px-3 py-2">float32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">titulacion_nombre</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-recibos" class="modal" onclick="closeModal('recibos')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-indigo-700">📋 Recibos</h2>
+                <button onclick="closeModal('recibos')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_recibos.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 114,447 | <strong>Columnas:</strong> 4
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-indigo-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">curso_aca</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">forma_pago</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">numero_pagos</td><td class="px-3 py-2">int8</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-titulaciones" class="modal" onclick="closeModal('titulaciones')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-cyan-700">📋 Titulaciones</h2>
+                <button onclick="closeModal('titulaciones')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_titulaciones.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 45 | <strong>Columnas:</strong> 4
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-cyan-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">exp_tit_id</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">titulacion_nombre</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">rama</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">cred_titulacion</td><td class="px-3 py-2">Int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="modal-trabajo" class="modal" onclick="closeModal('trabajo')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-rose-700">📋 Trabajo</h2>
+                <button onclick="closeModal('trabajo')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="mb-4">
+                <a href="reporte_trabajo.html" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">📊 Ver Reporte Sweetviz</a>
+            </p>
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <strong>Registros:</strong> 195,524 | <strong>Columnas:</strong> 3
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-rose-100"><tr><th class="px-3 py-2 text-left">Columna</th><th class="px-3 py-2 text-left">Tipo</th><th class="px-3 py-2 text-right">% Nulos</th></tr></thead>
+                <tbody>
+                    <tr class="border-b "><td class="px-3 py-2">per_id_ficticio</td><td class="px-3 py-2">int32</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b bg-gray-50"><td class="px-3 py-2">curso_aca</td><td class="px-3 py-2">int16</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+<tr class="border-b "><td class="px-3 py-2">trabajo</td><td class="px-3 py-2">category</td><td class="px-3 py-2 text-right">0.0%</td></tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="bg-gray-800 text-white py-6 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>TFM: Prediccion de Abandono Universitario</p>
+            <p class="text-sm text-gray-400 mt-2">Maria Jose Morte | UJI | 2024</p>
+            <p class="text-xs text-gray-500 mt-1">HTML generado dinamicamente desde Python</p>
+        </div>
+    </footer>
+
+    <script>
+        function openModal(tabla) { document.getElementById('modal-' + tabla).classList.add('active'); }
+        function closeModal(tabla) { document.getElementById('modal-' + tabla).classList.remove('active'); }
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); } });
+    </script>
+</body>
+</html>
